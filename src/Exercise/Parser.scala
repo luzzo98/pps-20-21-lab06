@@ -12,7 +12,7 @@ package Exercise
 abstract class Parser[T] {
   def parse(t: T): Boolean  // is the token accepted?
   def end(): Boolean        // is it ok to end here
-  def parseAll(seq: Seq[T]): Boolean = (seq forall {parse(_)}) & end() // note &, not &&
+  def parseAll(seq: Seq[T]): Boolean = (seq forall parse) & end() // note &, not &&
 }
 
 class BasicParser(chars: Set[Char]) extends Parser[Char] {
@@ -22,17 +22,35 @@ class BasicParser(chars: Set[Char]) extends Parser[Char] {
 
 trait NonEmpty[T] extends Parser[T]{
   private[this] var empty = true
-  abstract override def parse(t: T) = {empty = false; super.parse(t)} // who is super??
-  abstract override def end() = !empty && {empty = true; super.end()}
+  abstract override def parse(t: T): Boolean = {empty = false; super.parse(t)} // who is super??
+  abstract override def end(): Boolean = !empty && {empty = true; super.end()}
 }
 
 class NonEmptyParser(chars: Set[Char]) extends BasicParser(chars) with NonEmpty[Char]
 
 trait NotTwoConsecutive[T] extends Parser[T]{
-  // ???
+  private[this] var consecutive = false
+  private[this] var previous: Option[T] = Option.empty
+  abstract override def parse(t: T): Boolean = {
+    if (consecutive)
+      false
+    else if (previous.isDefined && t==previous.get) {
+      consecutive = true
+      false
+    } else {
+      previous = Option(t)
+      super.parse(t)
+    }
+  }
 }
 
-class NotTwoConsecutiveParser(chars: Set[Char]) extends BasicParser(chars) // ??? with ...
+class NotTwoConsecutiveParser(chars: Set[Char]) extends BasicParser(chars) with NotTwoConsecutive[Char]
+
+object ParserFactory {
+  implicit class ParserFromString(s: String) {
+    def charParser(): Parser[Char] = new BasicParser(s.toSet)
+  }
+}
 
 
 object TryParsers extends App {
@@ -49,9 +67,9 @@ object TryParsers extends App {
   println(parserNE.parseAll(List())) // false
 
   def parserNTC = new NotTwoConsecutiveParser(Set('X','Y','Z'))
-  println(parserNTC.parseAll("XYZ".toList)) // true
-  println(parserNTC.parseAll("XYYZ".toList)) // false
-  println(parserNTC.parseAll("".toList)) // true
+  println("1" + parserNTC.parseAll("XYZ".toList)) // true
+  println("2" + parserNTC.parseAll("XYYZ".toList)) // false
+  println("3" + parserNTC.parseAll("".toList)) // true
 
   // note we do not need a class name here, we use the structural type
   def parserNTCNE = new BasicParser(Set('X','Y','Z')) with NotTwoConsecutive[Char] with NonEmpty[Char]
@@ -59,7 +77,8 @@ object TryParsers extends App {
   println(parserNTCNE.parseAll("XYYZ".toList)) // false
   println(parserNTCNE.parseAll("".toList)) // false
 
-  def sparser : Parser[Char] = ??? // "abc".charParser()
+  import Exercise.ParserFactory.ParserFromString
+  def sparser : Parser[Char] = "abc".charParser()
   println(sparser.parseAll("aabc".toList)) // true
   println(sparser.parseAll("aabcdc".toList)) // false
   println(sparser.parseAll("".toList)) // true
