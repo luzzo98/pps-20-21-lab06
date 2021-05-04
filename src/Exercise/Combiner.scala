@@ -9,33 +9,46 @@ trait Functions {
 object FunctionsImpl extends Functions {
 
   override def sum(a: List[Double]): Double = {
-    var res = 0.0
-    a.foreach(res+=_)
-    res
+    a.foldRight(0.0)(_+_)
+
+    // first implementation
+//    var res = 0.0
+//    a.foreach(res+=_)
+//    res
   }
 
   override def concat(a: Seq[String]): String = {
-    var res = ""
-    a.foreach(s => res=res.concat(s))
-    res
+    a.foldRight("")(_.concat(_))
+
+    // first implementation
+//    var res = ""
+//    a.foreach(s => res=res.concat(s))
+//    res
   }
 
   override def max(a: List[Int]): Int = {
-    var res = Int.MinValue
-    a.foreach(v => if (v>res) res=v)
-    res
+    a.foldRight(Int.MinValue)((a,b) => if (a>b) a else b)
+
+    // first implementation
+//    var res = Int.MinValue
+//    a.foreach(v => if (v>res) res=v)
+//    res
   }
 
-  def combine[A](c: Seq[A])(implicit combiner: Combiner[A]): A = {
-    var res = combiner.unit
-    c.foreach(v => res=combiner.combine(res,v))
-    res
+  // method added in the second point of step 2
+  def combine[T](a: Seq[T])(implicit combiner: Combiner[T]): T = {
+    a.foldRight(combiner.unit)((a,b) => combiner.combine(a,b))
+
+    // first implementation
+//    var res = combiner.unit
+//    a.foreach(v => res=combiner.combine(res,v))
+//    res
   }
 }
 
-trait Combiner[A] {
-  def unit: A
-  def combine(a: A, b: A): A
+trait Combiner[T] {
+  def unit: T
+  def combine(a: T, b: T): T
 }
 
 object CombinerObjects {
