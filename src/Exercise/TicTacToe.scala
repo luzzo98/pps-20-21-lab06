@@ -41,25 +41,29 @@ object TicTacToe extends App{
 
   def winOnDiagonal(board: Board): Option[Player] = {
     var res = Option.empty :Option[Player]
-    if (find(board, 1, 1).isDefined)
-      if ((find(board, 0, 0).isDefined && find(board, 2, 2).isDefined) || (find(board, 2, 0).isDefined && find(board, 0, 2).isDefined))
-        if ((find(board, 0, 0).get == find(board, 1, 1).get && find(board, 1, 1).get == find(board, 2, 2).get) ||
-          (find(board, 2, 0).get == find(board, 1, 1).get && find(board, 1, 1).get == find(board, 0, 2).get))
+    if (find(board, 1, 1).isDefined) {
+      if (find(board, 0, 0).isDefined && find(board, 2, 2).isDefined)
+        if (find(board, 0, 0).get == find(board, 1, 1).get && find(board, 1, 1).get == find(board, 2, 2).get)
           res = find(board, 1, 1)
+
+      if (find(board, 2, 0).isDefined && find(board, 0, 2).isDefined)
+        if (find(board, 2, 0).get == find(board, 1, 1).get && find(board, 1, 1).get == find(board, 0, 2).get)
+          res = find(board, 1, 1)
+    }
     res
   }
 
   def placeAnyMark(board: Board, player: Player): Seq[Board] = {
     // third implementation
-    for(x <- 0 to 2; y <- 0 to 2; if find(board,x,y).isEmpty) yield Mark(x,y,player) :: board
+    for (x <- 0 to 2; y <- 0 to 2; if find(board,x,y).isEmpty) yield Mark(x,y,player) :: board
   }
 
   def placeAnyMark2(board: Board, player: Player): Seq[Board] = {
-        for {
-          x <- 0 to 2
-          y <- 0 to 2
-          if !board.exists(v => v.x == x && v.y == y) && thereIsAWinner(board).isEmpty
-        } yield board :+ Mark(x,y,player)
+    for {
+      x <- 0 to 2
+      y <- 0 to 2
+      if !board.exists(v => v.x == x && v.y == y) && thereIsAWinner(board).isEmpty
+    } yield board :+ Mark(x,y,player)
   }
 
   def thereIsAWinner(board: Board): Option[Player] = {
@@ -84,10 +88,36 @@ object TicTacToe extends App{
     }
   }
 
+//  // Exercise 1: implement find such that..
+//  println(find(List(Mark(0,0,X)),0,0)) // Some(X)
+//  println(find(List(Mark(0,0,X),Mark(0,1,O),Mark(0,2,X)),0,1)) // Some(O)
+//  println(find(List(Mark(0,0,X),Mark(0,1,O),Mark(0,2,X)),1,1)) // None
+
+//  // Exercise 2: implement placeAnyMark such that..
+//  printBoards(placeAnyMark(List(),X))
+//  //... ... ..X ... ... .X. ... ... X..
+//  //... ..X ... ... .X. ... ... X.. ...
+//  //..X ... ... .X. ... ... X.. ... ...
+//  println
+//  printBoards(placeAnyMark(List(Mark(0,0,O)),X))
+//  //O.. O.. O.X O.. O.. OX. O.. O..
+//  //... ..X ... ... .X. ... ... X..
+//  //..X ... ... .X. ... ... X.. ...
+
   // Exercise 3 (ADVANCED!): implement computeAnyGame such that..
-  var i = 0
-  computeAnyGame(O, 5) foreach {g => printBoards(g)
-    if (g.size<6) println("--------------------------------------------------------"); i+=1}
+
+//  printBoards(placeAnyMark2(List(Mark(0,0,X),Mark(0,1,X),Mark(0,2,X)),X))
+
+//  var i = 0
+//  computeAnyGame(O, 5) foreach {
+//    g => printBoards(g)
+//    println()
+//    i+=1
+//    if (g.size<6)
+//        println("--------------------------------------------------------")
+//  }
+//  println(i)
+
   //... X.. X.. X.. XO.
   //... ... O.. O.. O..
   //... ... ... X.. X..
@@ -103,32 +133,32 @@ object TicTacToe extends App{
 
 //  def find(board: Board, x: Int, y: Int): Option[Player] = {
 //    // first version
-////    var res: Option[Player] = Option.empty
-////    for (mark <- board) {
-////      mark match {
-////        case Mark(x2, y2, player) => if (x2==x && y2==y) res = Option(player)
-////      }
-////    }
-////    res
+//    var res: Option[Player] = Option.empty
+//    for (mark <- board) {
+//      mark match {
+//        case Mark(x2, y2, player) => if (x2==x && y2==y) res = Option(player)
+//      }
+//    }
+//    res
 //  }
 
 //  def placeAnyMark(board: Board, player: Player): Seq[Board] = {
 //    // second implementation
-////    for {
-////      x <- 0 to 2
-////      y <- 0 to 2
-////      if !board.exists(v => v.x == x && v.y == y)
-////    } yield board :+ Mark(x,y,player)
+//    for {
+//      x <- 0 to 2
+//      y <- 0 to 2
+//      if !board.exists(v => v.x == x && v.y == y)
+//    } yield board :+ Mark(x,y,player)
 //
 //    // first implementation
-////    var res: Seq[Board] = collection.immutable.Seq.empty
-////    for (x <- 0 to 2) {
-////      for (y <- 0 to 2) {
-////        if (!board.exists(v => v.x == x && v.y == y))
-////          res = res :+ (board :+ Mark(x,y,player))
-////      }
-////    }
-////    res
+//    var res: Seq[Board] = collection.immutable.Seq.empty
+//    for (x <- 0 to 2) {
+//      for (y <- 0 to 2) {
+//        if (!board.exists(v => v.x == x && v.y == y))
+//          res = res :+ (board :+ Mark(x,y,player))
+//      }
+//    }
+//    res
 //  }
 
 //  def thereIsAWinner(board: Board): Option[Player] = {
@@ -153,20 +183,3 @@ object TicTacToe extends App{
 //    }
 //    res
 //  }
-
-
-//  // Exercise 1: implement find such that..
-//  println(find(List(Mark(0,0,X)),0,0)) // Some(X)
-//  println(find(List(Mark(0,0,X),Mark(0,1,O),Mark(0,2,X)),0,1)) // Some(O)
-//  println(find(List(Mark(0,0,X),Mark(0,1,O),Mark(0,2,X)),1,1)) // None
-//
-//  // Exercise 2: implement placeAnyMark such that..
-//  printBoards(placeAnyMark(List(),X))
-//  //... ... ..X ... ... .X. ... ... X..
-//  //... ..X ... ... .X. ... ... X.. ...
-//  //..X ... ... .X. ... ... X.. ... ...
-//  println
-//  printBoards(placeAnyMark(List(Mark(0,0,O)),X))
-//  //O.. O.. O.X O.. O.. OX. O.. O..
-//  //... ..X ... ... .X. ... ... X..
-//  //..X ... ... .X. ... ... X.. ...
